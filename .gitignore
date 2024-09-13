@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> ddc89ff (Started course project)
 # Logs
 logs
 *.log
@@ -50,7 +54,7 @@ web_modules/
 
 # Optional npm cache directory
 .npm
-
+.env
 # Optional eslint cache
 .eslintcache
 
