@@ -1,0 +1,21 @@
+{
+  "name": "project-webdev",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "build:css": "npx tailwindcss -i ./src/input.css -o ./public/css/output.css --watch",
+    "start": "nodemon server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.0",
+    "express-handlebars": "^8.0.1",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.11"
+  },
+  "keywords": [],
+  "description": ""
+}
