@@ -38,7 +38,18 @@ db.run(`CREATE TABLE IF NOT EXISTS users (
     role_id INTEGER,
     FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE SET NULL
 )`);
+
+
+db.run(`CREATE TABLE IF NOT EXISTS posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    content TEXT NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    user_id INTEGER,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)`);
+
 });
+
 
 
 // Different functions for sql queries
@@ -55,6 +66,68 @@ const createUser = (name, password, callback) => {
         });
     });
 };
+
+function createPost(content, user_id, callback) {
+    
+    
+    const sql = `INSERT INTO posts (content, user_id) VALUES (?, ?)`;
+    db.run(sql, [content, user_id], function(err){
+        if(err) {
+            return callback(err, this.lastID);
+        }
+        
+        callback(null, this.lastID);
+
+ });
+
+}
+
+
+function showAllPosts(page = 1, callback) {
+    const limit = 10;
+    const offset = (page - 1) * limit;
+
+    const sql = `
+        SELECT posts.*, users.name 
+        FROM posts 
+        JOIN users ON posts.user_id = users.id
+        ORDER BY posts.timestamp DESC
+        LIMIT ? OFFSET ?`;
+
+    db.all(sql, [limit, offset], (err, rows) => {
+        if (err) {
+            return callback(err);
+        }
+        callback(null, rows);
+
+});
+
+}
+
+
+function  totalPosts(callback) {
+    const sql = `SELECT COUNT(*) AS total FROM posts`;
+
+    db.get(sql, (err, result) => {
+        if (err) {
+            return callback(err);
+        }
+        callback(null, result.total);
+    });
+}
+
+
+function deletePost(postId, userId, callback) {
+    const sql = `DELETE FROM posts WHERE id = ? AND user_id = ?`;
+
+    db.run(sql, [postId, userId], function (err) {
+        if (err) {
+            return callback(err);
+        }
+        callback(null);
+    });
+}
+
 
 
 // Login function
@@ -106,5 +179,9 @@ startingData.users.forEach((user) => {
 
 module.exports = {
     createUser,
-    loginUser 
+    loginUser,
+    createPost,
+    showAllPosts,
+    deletePost,
+    totalPosts
 };
