@@ -1,20 +1,19 @@
-<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Profile</title>
-</head>
-<body>
+  </head>
+  <body>
     <h2>Profile</h2>
-     {{#if user}}
-            <div class="profile-info">
-                <h2>Welcome, {{user.name}}!</h2>
-                <p><strong>User ID:</strong> {{user.id}}</p>
-                <p><strong>Role ID:</strong> {{user.role_id}}</p>
-            </div>
+    {{#if user}}
+      <div>
+        <h2>Welcome, {{user.name}}!</h2>
+        <p><strong>User:</strong> {{user.id}}</p>
+        <p><strong>Role:</strong> {{user.role_id}}</p>
+        <a href="/logout">Log out</a>
+      </div>
     {{/if}}
-    <a href="/logout">Log out</a>
-    
-</body>
+
+  </body>
 </html>
