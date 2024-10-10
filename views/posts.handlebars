@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-4">
-
     <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
         <form action="/posts" method="POST">
             <textarea 
@@ -24,12 +23,17 @@
                 Post
             </button>
         </form>
+        
 
         {{#if posts.length}}
             <ul class="mt-6">
                 {{#each posts}}
+                {{#if (neq this.isBanned 1)}}
                 <li class="post mb-4 p-4 bg-gray-50 rounded-lg">
-                    <p class="font-semibold">{{this.name}} posted:</p>
+                     <strong>
+                      <a href="/profile/{{this.name}}" class="text-blue-500 hover:underline">{{this.name}}</a> 
+                    </strong> 
+                    
                     <p>{{this.content}}</p>
                     <small class="text-gray-500">{{this.timestamp}}</small>
                     {{#if (eq this.user_id ../user.id)}}
@@ -38,6 +42,7 @@
                     </form>
                     {{/if}}
                 </li>
+                {{/if}}
                 {{/each}}
             </ul>
         <div class="pagination flex items-center justify-center mt-8"> 

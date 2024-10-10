@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <!-- Background Section -->
+    <section class="bg-[url('/img/background.webp')] bg-cover bg-center h-screen md:h-[50vh] relative flex items-center justify-center">
+        <div class="absolute inset-0 bg-black bg-opacity-60"></div> 
+        <div class="container mx-auto text-center relative z-10 flex flex-col items-center space-y-4">
+            <h1 class="hero-text text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg animate-fadeInUp">Hi there, I'm Florent</h1>
+            <p class="text-lg md:text-xl text-gray-200 max-w-xl animate-fadeIn delay-200">and this is my school project</p>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="py-20 md:py-32 bg-gradient-to-r from-gray-50 via-gray-100 to-gray-200" id="about">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row items-center justify-center">
+                <!-- Image Container -->
+                <div class="md:w-1/2 mb-8 md:mb-0 md:pl-16 flex justify-center order-2 md:order-1">
+                    <div class="relative">
+                        <img src="img/background.webp" alt="Community Image" class="rounded-lg w-96 h-64 border-4 border-white shadow-lg object-cover transform hover:scale-105 transition-transform duration-300">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black opacity-50 rounded-lg"></div>
+                    </div>
+                </div> 
+
+                <!-- Text Content -->
+                <div class="md:w-1/2 text-center md:text-left order-1 md:order-2">
+                    <h2 class="text-3xl font-bold mb-4 text-gray-800 animate-slideInLeft">About Project Social Media</h2>
+                    <p class="text-gray-600 mb-6 animate-fadeIn delay-100">
+                       Welcome to Project Social Media. Right now, it is limited in what you can do but here are some of it:
+                    </p>
+                    <div class="flex flex-col space-y-4">
+
+                        <!-- Feature 1 -->
+                        <div class="bg-white p-4 rounded-lg shadow-lg flex items-start hover:bg-blue-50 transition-colors duration-300">
+                            <div>
+                                <h3 class="text-xl font-semibold mb-2 text-gray-800">Share Your thoughts</h3>
+                                <p class="text-gray-600">Post about your day, your thoughts, or anything you find interesting.</p>
+                            </div>
+                        </div>
+
+                        <!-- Feature 2 -->
+                        <div class="bg-white p-4 rounded-lg shadow-lg flex items-start hover:bg-green-50 transition-colors duration-300">
+                            <div>
+                                <h3 class="text-xl font-semibold mb-2 text-gray-800">Join the Conversation</h3>
+                                <p class="text-gray-600">Comment on posts, share your opinions, and connect with other members.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

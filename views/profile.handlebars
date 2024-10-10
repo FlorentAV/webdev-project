@@ -1,19 +1,147 @@
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Profile</title>
-  </head>
-  <body>
-    <h2>Profile</h2>
-    {{#if user}}
-      <div>
-        <h2>Welcome, {{user.name}}!</h2>
-        <p><strong>User:</strong> {{user.id}}</p>
-        <p><strong>Role:</strong> {{user.role_id}}</p>
-        <a href="/logout">Log out</a>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile</title>
+</head>
+<body>
+  <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
+    <!-- Profile -->
+    <div class="flex items-center border-b pb-6 mb-6">
+      <div class="w-16 h-16 mr-4">
+        <img 
+          src="/img/profile.jpg" 
+          alt="{{profileUser.name}}'s profile picture" 
+          class="w-full h-full rounded-full object-cover"
+        />
       </div>
+      <div>
+        <h2 class="text-xl font-semibold">{{profileUser.name}}</h2>
+        <p class="text-gray-500">Joined {{profileUser.dateJoined}}</p>
+        {{#if isOwner}}
+          <a href="/settings" class="text-blue-500 hover:underline">Settings</a>
+        {{/if}}
+         <p class="text-gray-500">{{followerCount}} followers</p>
+
+        <!-- Follow/Unfollow Button -->
+        {{#if (not isOwner)}}
+          {{#if isFollowing}}
+            <form action="/unfollow" method="POST" class="inline">
+              <input type="hidden" name="followedId" value="{{profileUser.id}}">
+              <button type="submit" class="bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-red-700">
+                Unfollow
+              </button>
+            </form>
+          {{else}}
+            <form action="/follow" method="POST" class="inline">
+              <input type="hidden" name="followedId" value="{{profileUser.id}}">
+              <button type="submit" class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700">
+                Follow
+              </button>
+            </form>
+          {{/if}}
+        {{/if}}
+
+        {{#if (eq profileUser.isBanned 1)}}
+          <p class="text-red-500">Banned</p>
+          {{#if (eq user.role_id 1)}}
+            <form action="/unban-user" method="POST" class="inline">
+              <input type="hidden" name="userId" value="{{profileUser.id}}">
+              <button type="submit" class="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-700">
+                Unban User
+              </button>
+            </form>
+          {{/if}}
+        {{else if (and (eq profileUser.role_id 2) (eq user.role_id 1))}}
+          <form action="/ban-user" method="POST" class="inline">
+            <input type="hidden" name="userId" value="{{profileUser.id}}">
+            <button type="submit" class="bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-red-700">
+              Ban User
+            </button>
+          </form>
+        {{/if}}
+      </div>
+    </div>
+
+    <!-- Post Form shown if the user owns the profile -->
+    {{#if isOwner}}
+      <form action="/posts" method="POST">
+        <textarea 
+          name="content" 
+          placeholder="What's on your mind?" 
+          rows="4" 
+          required
+          class="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:border-blue-500 mb-4"
+        ></textarea>
+        <button 
+          type="submit"
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+        >
+          Post
+        </button>
+      </form>
     {{/if}}
 
-  </body>
+   {{#if posts.length}}
+  <ul class="mt-6">
+    {{#each posts}}
+      <li class="post mb-4 p-4 bg-gray-50 rounded-lg">
+        <strong>
+          <a href="/profile/{{this.name}}" class="text-blue-500 hover:underline">{{this.name}}</a>
+        </strong> 
+        <p>{{this.content}}</p>
+        <small class="text-gray-500">{{this.timestamp}}</small>
+
+        <!-- Show comments-->
+        <button 
+          onclick="toggleComments({{this.id}})" 
+          class="text-blue-500 hover:underline mt-2">Show Comments</button>
+
+        <ul id="comments-{{this.id}}" class="comments mt-4 hidden">
+          {{#each this.comments}}
+            <li class="comment p-2 border-t border-gray-200">
+              <strong><a href="/profile/{{this.user_name}}" class="text-blue-500 hover:underline">{{this.user_name}}</a></strong> <!-- Commenter's name -->
+              <p>{{this.content}}</p> <!-- Comment content -->
+              <small class="text-gray-400">{{this.created_at}}</small>
+            </li>
+          {{/each}}
+           <form action="/post-comment" method="POST" class="mt-4">
+          <input type="hidden" name="postId" value="{{this.id}}">
+          <textarea name="content" class="w-full p-2 border rounded" placeholder="Write a comment..." required></textarea>
+          <button type="submit" class="bg-blue-500 text-white font-bold py-1 px-4 rounded hover:bg-blue-700 mt-2">Post Comment</button>
+        </form>
+        </ul>
+        
+        {{#if (eq this.user_id ../user.id)}}
+          <form action="/delete-post/{{this.id}}" method="POST" onsubmit="return confirm('Are you sure you want to delete this post?');">
+            <button type="submit" class="text-red-500 hover:text-red-700">Delete</button>
+          </form>
+        {{/if}}
+      </li>
+    {{/each}}
+  </ul>
+
+      <!-- Pagination -->
+      <div class="pagination flex items-center justify-center mt-8">
+        {{#if (gt currentPage 1)}}
+          <a href="/profile/{{profileUser.name}}?page={{subtract currentPage 1}}" class="px-3 py-2 rounded-l bg-gray-200 hover:bg-gray-300 text-gray-800"> 
+            Previous
+          </a>
+        {{/if}}
+
+        <span class="px-3 py-2 border-t border-b border-gray-300 text-gray-600">
+          Page {{currentPage}} of {{totalPages}}
+        </span>
+
+        {{#if (lt currentPage totalPages)}}
+          <a href="/profile/{{profileUser.name}}?page={{add currentPage 1}}" class="px-3 py-2 rounded-r bg-gray-200 hover:bg-gray-300 text-gray-800"> 
+            Next
+          </a>
+        {{/if}}
+      </div>
+    {{else}}
+      <p class="mt-6 text-center text-gray-500">No posts to display</p>
+    {{/if}}
+  </div>
+</body>
 </html>

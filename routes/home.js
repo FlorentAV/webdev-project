@@ -1,25 +1,51 @@
 const express = require("express");
 const router = express.Router();
-const sqlite3 = require("sqlite3").verbose();
-const db = new sqlite3.Database("./db/database");
 const { isAuthenticated } = require("../middlewares/authMiddleware");
 const {
   createPost,
   showAllPosts,
   deletePost,
   totalPosts,
+  findOwner,
+  getComments,
 } = require("../db/database.js");
 
-router.get("/", isAuthenticated, (req, res) => {
-  res.render("home", {
-    title: "Home",
-    user: req.session.user,
-    page: "home",
-    successMessage: req.session.successMessage,
-  });
-  delete req.session.successMessage; // Delete the sucessMessage so it only appears once when you successfully login
+// Home page with paginated posts and comments
+router.get("/", isAuthenticated, async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+
+  try {
+    const posts = await showAllPosts(page);
+    const postsWithComments = await Promise.all(
+      posts.map(async (post) => ({
+        ...post,
+        comments: await getComments(post.id),
+      }))
+    );
+
+    const total = await totalPosts();
+    const totalPages = Math.ceil(total / 10);
+
+    res.render("home", {
+      title: "Home",
+      page: "home",
+      user: req.session.user,
+      posts: postsWithComments,
+      totalPages,
+      currentPage: page,
+      successMessage: req.session.successMessage,
+      errorMessage: req.session.errorMessage,
+    });
+
+    delete req.session.successMessage;
+    delete req.session.errorMessage;
+  } catch (error) {
+    req.session.errorMessage = "Error retrieving posts or comments";
+    res.redirect("/profile");
+  }
 });
 
+// Contact page
 router.get("/contact", (req, res) => {
   res.render("contact", {
     title: "Contact",
@@ -28,6 +54,7 @@ router.get("/contact", (req, res) => {
   });
 });
 
+// About page
 router.get("/about", (req, res) => {
   res.render("about", {
     title: "About",
@@ -36,63 +63,55 @@ router.get("/about", (req, res) => {
   });
 });
 
-router.get("/posts", isAuthenticated, (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-
-  showAllPosts(page, (err, posts) => {
-    if (err) {
-      req.session.errorMessage = "Error retrieving posts";
-      return res.render("posts", { errorMessage: req.session.errorMessage });
-    }
-
-    totalPosts((err, total) => {
-      if (err) {
-        req.session.errorMessage = "Error counting posts";
-        return res.render("posts", { errorMessage: req.session.errorMessage });
-      }
-
-      const totalPages = Math.ceil(total / 10);
-
-      res.render("posts", {
-        title: "Posts",
-        user: req.session.user,
-        page: "posts",
-        posts: posts,
-        totalPages,
-        currentPage: page,
-      });
-    });
-  });
-});
-
-router.post("/posts", (req, res) => {
+// Create a new post
+router.post("/posts", isAuthenticated, async (req, res) => {
   const userId = req.session.user.id;
   const content = req.body.content;
 
   if (!content || content.trim() === "") {
-    req.session.errorMessage = "The content can not be empty!";
-    return res.render("posts", { errorMessage: req.session.errorMessage });
+    req.session.errorMessage = "The content cannot be empty!";
+    return res.redirect("back");
   }
 
-  createPost(content, userId, (post) => {
+  try {
+    await createPost(content, userId);
     req.session.successMessage = "Posted!";
-    res.redirect('back');
+  } catch (error) {
+    req.session.errorMessage = "Error creating post";
+  }
+  res.redirect("back");
+});
+
+// Banned user page
+router.get("/banned", (req, res) => {
+  const errorMessage = req.session.errorMessage || "You are banned from this platform.";
+  delete req.session.errorMessage;
+  req.session.destroy();
+  res.clearCookie("userId");
+  res.render("banned", {
+    title: "Banned",
+    errorMessage,
   });
 });
 
-router.post("/delete-post/:id", (req, res) => {
+// Delete a post by ID
+router.post("/delete-post/:id", isAuthenticated, async (req, res) => {
   const postId = req.params.id;
   const userId = req.session.user.id;
 
-  deletePost(postId, userId, (err) => {
-    if (err) {
-      req.session.errorMessage = "Error deleting post";
-      return res.render("posts");
+  try {
+    const ownerId = await findOwner(postId);
+
+    if (req.session.user.role_id !== 1 && userId !== ownerId) {
+      return res.status(403).send("Permission denied");
     }
 
+    await deletePost(postId);
     req.session.successMessage = "Post deleted!";
-    res.redirect('back');
-  });
+  } catch (error) {
+    req.session.errorMessage = "Error deleting post";
+  }
+  res.redirect("back");
 });
 
 module.exports = router;
