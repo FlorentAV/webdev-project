@@ -40,7 +40,6 @@ module.exports = {
             { user_id: 5, content: 'Me too!', created_at: new Date() }
         ]},
         { user_id: 5, content: 'Looking forward to connecting with everyone!', created_at: new Date(), comments: [] },
-        // Additional Posts
         { user_id: 1, content: 'Just finished a great book!', created_at: new Date(), comments: [
             { user_id: 2, content: 'What book was it?', created_at: new Date() },
             { user_id: 3, content: 'I love reading!', created_at: new Date() }
@@ -99,7 +98,6 @@ module.exports = {
         { post_id: 1, user_id: 3, content: 'I totally agree!' },
         { post_id: 2, user_id: 1, content: 'Welcome!' },
         { post_id: 3, user_id: 2, content: 'Glad to see you here!' },
-        // Additional Comments
         { post_id: 1, user_id: 2, content: 'What a great start!' },
         { post_id: 1, user_id: 3, content: 'Can’t wait for more!' },
         { post_id: 2, user_id: 1, content: 'Keep it up!' },

@@ -1,8 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { isAuthenticated } = require("../middlewares/authMiddleware");
 const {
-  createPost,
+  isAuthenticated,
+  isLoggedIn,
+} = require("../middlewares/authMiddleware");
+const {
   showAllPosts,
   deletePost,
   totalPosts,
@@ -45,14 +47,35 @@ router.get("/", isAuthenticated, async (req, res) => {
   }
 });
 
-// Contact page
-router.get("/contact", (req, res) => {
-  res.render("contact", {
-    title: "Contact",
+router.get("/signup", isLoggedIn, (req, res) => {
+  res.render("signup", {
+    title: "Signup",
     user: req.session.user,
-    page: "contact",
+    page: "signup",
+    successMessage: req.session.successMessage,
+    errorMessage: req.session.errorMessage,
   });
 });
+
+// Route for logout
+router.get("/logout", isAuthenticated, (req, res) => {
+  req.session.destroy();
+  res.clearCookie("userId");
+  res.redirect("/");
+});
+
+// Route for login page
+router.get("/login", isLoggedIn, (req, res) => {
+  res.render("login", {
+    title: "Login",
+    page: "login",
+    successMessage: req.session.successMessage,
+    errorMessage: req.session.errorMessage,
+  });
+  delete req.session.successMessage;
+  delete req.session.errorMessage;
+});
+
 
 // About page
 router.get("/about", (req, res) => {
@@ -63,28 +86,10 @@ router.get("/about", (req, res) => {
   });
 });
 
-// Create a new post
-router.post("/posts", isAuthenticated, async (req, res) => {
-  const userId = req.session.user.id;
-  const content = req.body.content;
-
-  if (!content || content.trim() === "") {
-    req.session.errorMessage = "The content cannot be empty!";
-    return res.redirect("back");
-  }
-
-  try {
-    await createPost(content, userId);
-    req.session.successMessage = "Posted!";
-  } catch (error) {
-    req.session.errorMessage = "Error creating post";
-  }
-  res.redirect("back");
-});
-
 // Banned user page
-router.get("/banned", (req, res) => {
-  const errorMessage = req.session.errorMessage || "You are banned from this platform.";
+router.get("/banned", isLoggedIn, (req, res) => {
+  const errorMessage =
+    req.session.errorMessage;
   delete req.session.errorMessage;
   req.session.destroy();
   res.clearCookie("userId");
@@ -94,24 +99,6 @@ router.get("/banned", (req, res) => {
   });
 });
 
-// Delete a post by ID
-router.post("/delete-post/:id", isAuthenticated, async (req, res) => {
-  const postId = req.params.id;
-  const userId = req.session.user.id;
 
-  try {
-    const ownerId = await findOwner(postId);
-
-    if (req.session.user.role_id !== 1 && userId !== ownerId) {
-      return res.status(403).send("Permission denied");
-    }
-
-    await deletePost(postId);
-    req.session.successMessage = "Post deleted!";
-  } catch (error) {
-    req.session.errorMessage = "Error deleting post";
-  }
-  res.redirect("back");
-});
 
 module.exports = router;

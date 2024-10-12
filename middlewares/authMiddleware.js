@@ -1,23 +1,23 @@
-const { findUserById } = require("../db/database.js");
+// Middlewares for authentication
 
+
+// Logged in users
 const isAuthenticated = (req, res, next) => {
     
     if (req.session.user) {
-        console.log("is banned = " + req.session.user.isBanned)
             if(req.session.user.isBanned === 1) {
                 req.session.errorMessage = 'You are banned!';
                 return res.redirect('/banned');
             }
             return next();
         }
-        // User is authenticated, proceed to the next middleware or route
         
      else {
-        // User is not authenticated, redirect to login page
         return res.redirect('/login');
     }
 }
 
+// Check if user is Admin
 const isAdmin = (req, res, next) => {
 
     if(req.session.user.role_id === 1) {
@@ -29,15 +29,16 @@ const isAdmin = (req, res, next) => {
 
 }
 
-
+// Used for checking if user is logged in (if they try to go to login page or register while logged in)
 const isLoggedIn = (req, res, next) => {
     if (req.session && req.session.user) {
-        // User is logged in, redirect to home
+        
         return res.redirect('/');
     }
-    // User is not logged in, proceed to the next middleware
+    
     next();
 };
+
 module.exports = {
     isAuthenticated,
     isLoggedIn,
