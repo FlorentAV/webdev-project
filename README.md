@@ -20,7 +20,7 @@ Things you can do:
 
 Things you can do as an Admin:
 * Delete any comment
-* Ban and unban an user
+* Ban and unban a user
 * Delete users
 * Access to userlist page.
 * Change users password.
