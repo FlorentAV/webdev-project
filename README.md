@@ -1,6 +1,8 @@
 # Social Media Project (School Project)
 
 This project is created with Node.JS.
+I've also used TailwindCSS as CSS framework to speed up the process of making this website, as it is more focused on the backend than the frontend.
+
 
 # How to Run
 To use the project, download the zip file, extract it and open it with VS Code. Type in "npm i" in the terminal.

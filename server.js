@@ -3,7 +3,6 @@ const { engine } = require('express-handlebars');
 const session   = require('express-session');
 const cookieParser = require('cookie-parser');
 const helpers = require('./helpers/handlebars-helpers');
-const db = require('./db/database');
 const { findUserById } = require('./db/database.js');
 
 require('dotenv').config();
@@ -12,6 +11,7 @@ const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
 
 app.engine('handlebars', engine({
     helpers: helpers,
@@ -43,24 +43,25 @@ app.use(session({
 }));
 
 
+
 app.use(async (req, res, next) => {
     if (req.cookies.userId && !req.session.user) {
-        // Logic to retrieve user based on userId from the cookie
+        
         const userId = req.cookies.userId;
 
         try {
-            // Assuming you have a function to find a user by ID
+            
             const user = await findUserById(userId);
 
             if (user) {
-                req.session.user = user; // Log the user in
+                req.session.user = user; 
             }
         } catch (err) {
             console.error('Error retrieving user:', err);
-            // You might want to handle the error or log it
+           
         }
     }
-    next(); // Proceed to the next middleware/route
+    next(); 
 });
 
 

@@ -41,7 +41,7 @@
                     </strong> 
                     <p>{{this.content}}</p>
                     <small class="text-gray-500">{{this.timestamp}}</small>
-                     <!-- Show Comments Toggle Button -->
+                     
         <button 
           onclick="toggleComments({{this.id}})" 
           class="text-blue-500 hover:underline mt-2"
@@ -49,12 +49,12 @@
           Show Comments
         </button>
 
-        <!-- Comments Section (initially hidden) -->
+        
         <ul id="comments-{{this.id}}" class="comments mt-4 hidden">
           {{#each this.comments}}
             <li class="comment p-2 border-t border-gray-200">
-              <strong><a href="/profile/{{this.user_name}}" class="text-blue-500 hover:underline">{{this.user_name}}</a></strong> <!-- Commenter's name -->
-              <p>{{this.content}}</p> <!-- Comment content -->
+              <strong><a href="/profile/{{this.user_name}}" class="text-blue-500 hover:underline">{{this.user_name}}</a></strong> 
+              <p>{{this.content}}</p> 
               <small class="text-gray-400">{{this.created_at}}</small>
             </li>
           {{/each}}

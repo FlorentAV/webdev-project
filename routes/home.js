@@ -6,9 +6,7 @@ const {
 } = require("../middlewares/authMiddleware");
 const {
   showAllPosts,
-  deletePost,
   totalPosts,
-  findOwner,
   getComments,
 } = require("../db/database.js");
 
@@ -47,6 +45,7 @@ router.get("/", isAuthenticated, async (req, res) => {
   }
 });
 
+// Route for signing up
 router.get("/signup", isLoggedIn, (req, res) => {
   res.render("signup", {
     title: "Signup",
