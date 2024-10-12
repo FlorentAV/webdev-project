@@ -2,7 +2,12 @@
 
 This project is created with Node.JS.
 
-To use the project, download it and run it with "npm i"
+# How to Run
+To use the project, download the zip file, extract it and open it with VS Code. Type in "npm i" in the terminal.
+After you've done that, you can start the server by typing in the terminal "npm start"
+If you've made changes using TailWindCSS, run also "npm run build:css" in the terminal
+Visist "localhost:3000" in your browser to get access to the website.
+
 
 ## Information
 Things you can do:
