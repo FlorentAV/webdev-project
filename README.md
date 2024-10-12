@@ -27,7 +27,7 @@ Things you can do:
 * Change your password in settings.
 
 Things you can do as an Admin:
-* Delete any comment
+* Delete any post (deleting comments not added)
 * Ban and unban a user
 * Delete users
 * Access to userlist page.
