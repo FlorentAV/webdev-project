@@ -8,6 +8,12 @@ After you've done that, you can start the server by typing in the terminal "npm 
 If you've made changes using TailWindCSS, run also "npm run build:css" in the terminal
 Visit "localhost:3000" in your browser to get access to the website.
 
+NOTE! 
+If you have downloaded from GitHub, you will also need to create a file in the root directory named ".env"
+In there, add "SESSION_SECRET = YourRandomGeneratedCode "
+Replace the text with a generated code.
+You can also go to server.js and edit this line from: "secret: process.env.SESSION_SECRET" to: " secret: 'your secret code here' "
+
 
 ## Information
 Things you can do:
