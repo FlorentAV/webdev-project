@@ -2,7 +2,8 @@
 
 This project is created with Node.JS.
 
-'
+To use the project, download it and run it with "npm i"
+
 ## Information
 Things you can do:
 
