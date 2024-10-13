@@ -308,8 +308,8 @@ router.post("/register", async (req, res) => {
     return res.redirect("/signup");
   }
 
-  if (password.length < 6) {
-    req.session.errorMessage = "Atleast make a 6+ character password, please!";
+  if (password.length < 6 || password.includes(" ")) {
+    req.session.errorMessage = "Atleast make a 6+ character password, please! (PS. No spaces please!)";
     return res.redirect("/signup");
   }
 
