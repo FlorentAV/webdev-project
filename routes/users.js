@@ -2,7 +2,11 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const router = express.Router();
-const { isAuthenticated, isAdmin } = require("../middlewares/authMiddleware");
+const {
+  isAuthenticated,
+  isAdmin,
+  isSupport,
+} = require("../middlewares/authMiddleware");
 const {
   showAllPosts,
   totalPosts,
@@ -49,7 +53,7 @@ router.post("/delete-user", isAuthenticated, isAdmin, async (req, res) => {
     if (!user) {
       req.session.errorMessage =
         "Cannot delete something that is already probably deleted, or never existed in the first place.";
-      return res.redirect("back");
+        return res.redirect(req.headers.referer);
     }
 
     if (user.role_id !== 1) {
@@ -59,41 +63,46 @@ router.post("/delete-user", isAuthenticated, isAdmin, async (req, res) => {
       req.session.errorMessage =
         "Sorry but deleting an Admin would mean the end of this site!";
     }
-    res.redirect("back");
+    return res.redirect(req.headers.referer);
   } catch (error) {
     req.session.errorMessage = "Error deleting user";
-    res.redirect("back");
+    return res.redirect(req.headers.referer);
   }
 });
 
 // Route to display user list for admins
-router.get("/userlist", isAuthenticated, isAdmin, async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const usersPerPage = 10;
+router.get(
+  "/userlist",
+  isAuthenticated,
+  isSupport,
+  async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const usersPerPage = 10;
 
-  try {
-    const users = await getAllUsers(page, usersPerPage);
-    const totalUsers = await getTotalUsers();
-    const totalPages = Math.ceil(totalUsers / usersPerPage);
+    try {
+      const users = await getAllUsers(page, usersPerPage);
+      const totalUsers = await getTotalUsers();
+      const totalPages = Math.ceil(totalUsers / usersPerPage);
 
-    res.render("userlist", {
-      title: "User List",
-      users,
-      page: "userlist",
-      user: req.session.user,
-      currentPage: page,
-      totalPages,
-      successMessage: req.session.successMessage,
-      errorMessage: req.session.errorMessage,
-    });
-  } catch (error) {
-    req.session.errorMessage = "Error loading user list";
-    res.redirect("back");
+      res.render("userlist", {
+        title: "User List",
+        users,
+        page: "userlist",
+        user: req.session.user,
+        currentPage: page,
+        totalPages,
+        successMessage: req.session.successMessage,
+        errorMessage: req.session.errorMessage,
+      });
+    } catch (error) {
+      req.session.errorMessage = "Error loading user list";
+      return res.redirect(req.headers.referer);
+    }
+
+    delete req.session.successMessage;
+    delete req.session.errorMessage;
   }
-
-  delete req.session.successMessage;
-  delete req.session.errorMessage;
-});
+);
 
 // Route for profile viewing
 router.get(
@@ -150,57 +159,67 @@ router.get(
 );
 
 // Route to ban a user
-router.post("/ban-user", isAuthenticated, isAdmin, async (req, res) => {
-  const { userId } = req.body;
+router.post(
+  "/ban-user",
+  isAuthenticated,
+  isSupport,
+  async (req, res) => {
+    const { userId } = req.body;
 
-  try {
-    const user = await findUserById(userId);
-    if (!user) {
-      req.session.errorMessage = "Nah there are no one to even ban here!";
+    try {
+      const user = await findUserById(userId);
+      if (!user) {
+        req.session.errorMessage = "Nah there are no one to even ban here!";
+        return res.redirect(req.headers.referer);
+      }
+
+      if (user.role_id === 1) {
+        req.session.errorMessage =
+          "What do you mean banning an Admin? That is illegal in our community!";
+        return res.redirect(req.headers.referer);
+      }
+
+      await banUser(userId);
+      req.session.successMessage = "GET OUT OF HERE! USER IS NOW BANNED!";
       res.redirect(req.headers.referer);
+    } catch (error) {
+      req.session.errorMessage = "Error banning user";
+      return res.redirect(req.headers.referer);
     }
-
-    if (user.role_id === 1) {
-      req.session.errorMessage =
-        "What do you mean banning an Admin? That is illegal in our community!";
-        res.redirect(req.headers.referer);
-    }
-
-    await banUser(userId);
-    req.session.successMessage = "GET OUT OF HERE! USER IS NOW BANNED!";
-    res.redirect(req.headers.referer);
-  } catch (error) {
-    req.session.errorMessage = "Error banning user";
-    res.redirect(req.headers.referer);
   }
-});
+);
 
 // Route to unban a user
-router.post("/unban-user", isAuthenticated, isAdmin, async (req, res) => {
-  const { userId } = req.body;
+router.post(
+  "/unban-user",
+  isAuthenticated,
+  isSupport,
+  async (req, res) => {
+    const { userId } = req.body;
 
-  try {
-    const user = await findUserById(userId);
-    if (!user) {
-      req.session.errorMessage = "You cannot ban a ghost, I am sorry.";
+    try {
+      const user = await findUserById(userId);
+      if (!user) {
+        req.session.errorMessage = "You cannot ban a ghost, I am sorry.";
+        res.redirect(req.headers.referer);
+      }
+
+      if (user.role_id === 1) {
+        req.session.errorMessage =
+          "How did even an admin get banned in the first place?";
+        res.redirect(req.headers.referer);
+      }
+
+      await unbanUser(userId);
+      req.session.successMessage =
+        "Are you sure this was a good idea? Well the user is unbanned anyway.";
+      res.redirect(req.headers.referer);
+    } catch (error) {
+      req.session.errorMessage = "Error unbanning user";
       res.redirect(req.headers.referer);
     }
-
-    if (user.role_id === 1) {
-      req.session.errorMessage =
-        "How did even an admin get banned in the first place?";
-        res.redirect(req.headers.referer);
-    }
-
-    await unbanUser(userId);
-    req.session.successMessage =
-      "Are you sure this was a good idea? Well the user is unbanned anyway.";
-        res.redirect(req.headers.referer);
-  } catch (error) {
-    req.session.errorMessage = "Error unbanning user";
-    res.redirect(req.headers.referer);
   }
-});
+);
 
 router.post("/posts", isAuthenticated, async (req, res) => {
   const userId = req.session.user.id;
@@ -244,27 +263,55 @@ router.post("/post-comment", isAuthenticated, async (req, res) => {
 
 // Delete a post by ID
 router.post("/delete-post/:id", isAuthenticated, async (req, res) => {
-    const postId = req.params.id;
-    const userId = req.session.user.id;
-  
-    try {
-      const ownerId = await findOwner(postId);
-  
-      if (req.session.user.role_id !== 1 && userId !== ownerId) {
-        return res.status(403).send("Hey, you are not the owner of this post!");
-      }
-  
-      await deletePost(postId);
-      req.session.successMessage = "Bye bye, post!";
-    } catch (error) {
+  const postId = req.params.id;
+  const userId = req.session.user.id;
+
+  try {
+    const ownerId = await findOwner(postId);
+
+    if ((req.session.user.role_id !== 1 && req.session.user.role_id !== 3) && userId !== ownerId) {
       req.session.errorMessage = "Error deleting post";
+      return res.status(403).send("Hey, you are not the owner of this post!");
     }
-    res.redirect(req.headers.referer);
-  });
+
+    await deletePost(postId);
+    req.session.successMessage = "Bye bye, post!";
+  } catch (error) {
+    req.session.errorMessage = "Error deleting post";
+  }
+  return res.redirect(req.headers.referer);
+});
 
 // Registration route
 router.post("/register", async (req, res) => {
   const { name, password } = req.body;
+  const nameRegex = /^[a-zA-Z0-9_-]+$/;
+
+  if (!name || name.trim() === "") {
+    req.session.errorMessage = "Hey, username must be chosen!";
+    return res.redirect("/signup");
+  }
+  if (!nameRegex.test(name)) {
+    req.session.errorMessage =
+      "ONLY use letters, numbers, underscores, and hyphens.";
+    return res.redirect("/signup");
+  }
+
+  if (name.length > 12) {
+    req.session.errorMessage =
+      "Hey, that username is too long! Please use something with 12 characters or less.";
+    return res.redirect("/signup");
+  }
+
+  if (name.includes(" ")) {
+    req.session.errorMessage = "Invalid username, no spaces please!";
+    return res.redirect("/signup");
+  }
+
+  if (password.length < 6) {
+    req.session.errorMessage = "Atleast make a 6+ character password, please!";
+    return res.redirect("/signup");
+  }
 
   try {
     await createUser(name, password);
@@ -307,7 +354,7 @@ router.post("/change-password", isAuthenticated, async (req, res) => {
 router.post(
   "/change-user-password",
   isAuthenticated,
-  isAdmin,
+  isSupport,
   async (req, res) => {
     const { userId, newPassword } = req.body;
 
@@ -385,7 +432,7 @@ router.post("/unfollow", isAuthenticated, async (req, res) => {
     await unfollowUser(followerId, followedId);
     req.session.successMessage =
       "Well, you have now unfollowed this user, why so?";
-      res.redirect(req.headers.referer);
+    res.redirect(req.headers.referer);
   } catch (error) {
     req.session.errorMessage = "Failed to unfollow user!";
     res.redirect(req.headers.referer);

@@ -7,15 +7,15 @@ module.exports = {
         { role_name: 'editor' }
     ],
     users: [
-        { name: 'Admin', password: '123', role_id: 1 },
+        { name: 'Admin', password: '123', role_id: 1 }, // Admin login
     { name: 'Bob', password: '123', role_id: 2 },
     { name: 'Charlie', password: '123', role_id: 2 },
     { name: 'Diana', password: '123', role_id: 2 },
     { name: 'Ethan', password: '123', role_id: 2 },
-    { name: 'Fiona', password: '123', role_id: 2 },
+    { name: 'Fiona', password: '123', role_id: 3 },
     { name: 'George', password: '123', role_id: 2 },
     { name: 'Hannah', password: '123', role_id: 2 },
-    { name: 'Isaac', password: '123', role_id: 2 },
+    { name: 'Isaac', password: '123', role_id: 3 },
     { name: 'Jasmine', password: '123', role_id: 2 },
     { name: 'Kevin', password: '123', role_id: 2 },
     { name: 'Laura', password: '123', role_id: 2 },

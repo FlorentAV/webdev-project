@@ -312,7 +312,13 @@ async function loginUser(name, password) {
   const sql = `SELECT * FROM users WHERE name = ?`;
   return new Promise((resolve, reject) => {
     db.get(sql, [name], async (err, user) => {
-      if (err || !user) return reject(err || new Error("User not found"));
+      if (!user){
+        return resolve(null);
+      }
+      if(err) {
+          return reject(err);
+      }
+  
       const isMatch = await bcrypt.compare(password, user.password);
       if (isMatch) resolve(user);
       else resolve(null);

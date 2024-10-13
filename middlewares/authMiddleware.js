@@ -24,7 +24,18 @@ const isAdmin = (req, res, next) => {
         return next();
     } else {
         req.session.errorMessage = 'You do not have permission!';
-        return res.redirect('/');
+        return res.redirect(req.headers.referer);
+    }
+
+}
+
+const isSupport = (req, res, next) => {
+
+    if(req.session.user.role_id === 3 || req.session.user.role_id === 1) {
+        return next();
+    } else {
+        req.session.errorMessage = 'You do not have permission!';
+        return res.redirect(req.headers.referer);
     }
 
 }
@@ -42,5 +53,6 @@ const isLoggedIn = (req, res, next) => {
 module.exports = {
     isAuthenticated,
     isLoggedIn,
-    isAdmin
+    isAdmin,
+    isSupport
 };

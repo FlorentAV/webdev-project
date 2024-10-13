@@ -32,7 +32,7 @@
         </form>
 
         {{#if posts.length}}
-            <ul class="mt-6">
+            <ul class="mt-6 bg-gray-200 p-4 rounded-lg border border-gray-300">
                 {{#each posts}}
                 {{#if (eq this.isBanned 0)}}
                 <li class="post mb-4 p-4 bg-gray-50 rounded-lg">
@@ -66,11 +66,17 @@
           </button>
         </form>
         </ul>
-                    {{#if (or (eq this.user_id ../user.id) (eq ../user.role_id 1))}}
-                    <form action="/delete-post/{{this.id}}" method="POST" onsubmit="return confirm('Are you sure you want to delete this post?');">
-                        <button type="submit" class="text-red-500 hover:text-red-700">Delete</button>
-                    </form>
-                    {{/if}}
+             {{#if (or (eq this.user_id ../user.id) (eq ../user.role_id 1))}}
+                <form action="/delete-post/{{this.id}}" method="POST" onsubmit="return confirm('Are you sure you want to delete this post?');">
+                <button type="submit" class="text-red-500 hover:text-red-700">Delete</button>
+                </form>
+            {{else if (eq ../user.role_id 3)}}
+                <form action="/delete-post/{{this.id}}" method="POST" onsubmit="return confirm('Are you sure you want to delete this post?');">
+                <button type="submit" class="text-red-500 hover:text-red-700">Delete</button>
+                </form>
+            {{/if}}
+                
+                
                 </li>
                 {{/if}}
                 {{/each}}
